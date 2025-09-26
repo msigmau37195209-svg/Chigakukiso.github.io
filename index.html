@@ -14,11 +14,8 @@
   <body style="margin: 0; overflow: hidden;">
     <!-- シーン -->
     <a-scene embedded arjs="debugUIEnabled: false;">
-      
-      <!-- マーカー検出（hiro マーカーを使用） -->
-      <a-marker preset="hiro">
-        
-        <!-- アセット読み込み -->
+
+              <!-- アセット読み込み -->
         <a-assets timeout="30000">
           <!-- ✅ a-asset-item が正しいタグ名 -->
           <a-asset-item id="chisou_obj" src="./assets/tinker.obj"></a-asset-item>
@@ -26,6 +23,10 @@
           <a-asset-item id="chisou_mtl" src="./assets/obj.mtl"></a-asset-item>
         </a-assets>
 
+      
+      <!-- マーカー検出（hiro マーカーを使用） -->
+      <a-marker preset="hiro">
+        
         <!-- モデル表示 -->
         <a-obj-model
           src="#chisou_obj"
