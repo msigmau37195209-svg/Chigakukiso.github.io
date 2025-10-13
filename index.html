@@ -2,39 +2,40 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>マーカーレスAR地層モデル（実物大）</title>
-    <meta name="description" content="A-Frame WebXR Hit Test 実物大モデル">
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-ar@1.2.0/dist/aframe-ar.min.js"></script>
+    <title>AR地層モデル（実物大）</title>
+    <meta name="description" content="A-Frame + AR.js 実物大モデル">
+    <!-- A-Frame本体 -->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <!-- AR.js for A-Frame -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   </head>
 
   <body style="margin: 0; overflow: hidden;">
-    <a-scene
-      vr-mode-ui="enabled: false"
-      embedded
-      ar-hit-test="target:#model; type:placement;"
-      renderer="colorManagement: true; physicallyCorrectLights: true;"
-      xr-mode-ui="enabled: true"
-      arjs="sourceType: webcam;">
+    <a-scene embedded arjs="debugUIEnabled: false;">
       
-      <!-- 🔹アセット -->
+      <!-- 🔹アセット（3Dモデルとマテリアル） -->
       <a-assets timeout="30000">
         <a-asset-item id="chisou_obj" src="./assets/tinker.obj"></a-asset-item>
         <a-asset-item id="chisou_mtl" src="./assets/obj.mtl"></a-asset-item>
       </a-assets>
 
-      <!-- 🔹地面を検出してモデルを置く -->
-      <a-entity
-        id="model"
-        visible="false"
-        gltf-model="#chisou_obj"
-        position="0 0 0"
-        rotation="180 0 0"
-        scale="10 10 10">
-      </a-entity>
+      <!-- 🔹マーカーの設定 -->
+      <a-marker preset="hiro">
+
+        <!-- 🔹3Dモデルの配置 -->
+        <a-obj-model
+          src="#chisou_obj"
+          mtl="#chisou_mtl"
+          rotation="180 0 0"      <!-- 上下反転修正 -->
+          position="0 1.25 0"     <!-- 地面に立つように高さの半分だけ持ち上げる -->
+          scale="10 10 10">       <!-- 実物大（25cm → 2.5m） -->
+        </a-obj-model>
+
+      </a-marker>
 
       <!-- 🔹カメラ -->
       <a-entity camera></a-entity>
+
     </a-scene>
   </body>
 </html>
