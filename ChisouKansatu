@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>マーカーレスAR地層モデル（実物大）</title>
+    <meta name="description" content="A-Frame WebXR Hit Test 実物大モデル">
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-ar@1.2.0/dist/aframe-ar.min.js"></script>
+  </head>
+
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      ar-hit-test="target:#model; type:placement;"
+      renderer="colorManagement: true; physicallyCorrectLights: true;"
+      xr-mode-ui="enabled: true"
+      arjs="sourceType: webcam;">
+      
+      <!-- 🔹アセット -->
+      <a-assets timeout="30000">
+        <a-asset-item id="chisou_obj" src="./assets/tinker.obj"></a-asset-item>
+        <a-asset-item id="chisou_mtl" src="./assets/obj.mtl"></a-asset-item>
+      </a-assets>
+
+      <!-- 🔹地面を検出してモデルを置く -->
+      <a-entity
+        id="model"
+        visible="false"
+        gltf-model="#chisou_obj"
+        position="0 0 0"
+        rotation="180 0 0"
+        scale="10 10 10">
+      </a-entity>
+
+      <!-- 🔹カメラ -->
+      <a-entity camera></a-entity>
+    </a-scene>
+  </body>
+</html>
