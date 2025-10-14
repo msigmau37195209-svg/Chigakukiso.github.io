@@ -8,7 +8,7 @@
     <!-- A-Frame --> 
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script> 
     <!-- AR.js (for A-Frame) --> 
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script> 
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.3/aframe/build/aframe-ar.js"></script> 
   </head> 
  
   <body style="margin: 0; overflow: hidden;"> 
@@ -21,12 +21,12 @@
  
       <!-- マーカー --> 
       <a-marker preset="hiro" size="0.1"> 
-        <a-obj-model 
+        <a-glb-model 
           src="#chisou_glb"
           position="0 0 0" 
           rotation="0 0 0"
           scale="1 1 1"> <!-- 例: 実物大に調整 -->
-        </a-obj-model> 
+        </a-glb-model> 
       </a-marker> 
  
       <!-- カメラ --> 
