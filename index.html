@@ -2,72 +2,28 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR地層モデル（マーカーレス実物大）</title>
+    <title>Markerless AR (AR.js)</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar-nft.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
     <a-scene
-      renderer="colorManagement: true; physicallyCorrectLights: true;"
-      xr-mode-ui="enabled: true"
-      webxr="optionalFeatures: hit-test;"
+      vr-mode-ui="enabled: false"
       embedded
-      vr-mode-ui="enabled: false">
+      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
 
-      <!-- モデル -->
       <a-assets>
-        <a-asset-item id="model-glb" src="./assets/tinker.glb"></a-asset-item>
+        <a-asset-item id="model" src="./assets/tinker.glb"></a-asset-item>
       </a-assets>
 
-      <!-- モデル表示位置を示すリング -->
-      <a-entity id="reticle"
-                visible="false"
-                geometry="primitive: ring; radiusInner: 0.04; radiusOuter: 0.05;"
-                material="color: yellow; shader: flat;"
-                rotation="-90 0 0">
-      </a-entity>
-
-      <a-entity id="model"
-                gltf-model="#model-glb"
-                visible="false"
+      <!-- モデルを固定位置に配置 -->
+      <a-entity gltf-model="#model"
+                position="0 0 -2"
+                rotation="0 180 0"
                 scale="10 10 10">
       </a-entity>
 
-      <a-camera></a-camera>
+      <a-entity camera></a-entity>
     </a-scene>
-
-    <script>
-      const scene = document.querySelector('a-scene');
-      const model = document.querySelector('#model');
-      const reticle = document.querySelector('#reticle');
-      let hitTestSource = null;
-      let localSpace = null;
-      let placed = false;
-
-      scene.addEventListener('enter-vr', async () => {
-        const session = scene.renderer.xr.getSession();
-        const viewerSpace = await session.requestReferenceSpace('viewer');
-        hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
-        localSpace = await session.requestReferenceSpace('local');
-
-        scene.renderer.xr.setAnimationLoop((_, frame) => {
-          if (!frame) return;
-          const results = frame.getHitTestResults(hitTestSource);
-          if (results.length > 0 && !placed) {
-            const pose = results[0].getPose(localSpace);
-            reticle.visible = true;
-            reticle.object3D.position.set(pose.transform.position.x, pose.transform.position.y, pose.transform.position.z);
-          }
-        });
-      });
-
-      window.addEventListener('click', () => {
-        if (reticle.visible && !placed) {
-          model.object3D.position.copy(reticle.object3D.position);
-          model.visible = true;
-          placed = true;
-          reticle.visible = false;
-        }
-      });
-    </script>
   </body>
 </html>
