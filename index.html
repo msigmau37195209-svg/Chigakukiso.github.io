@@ -2,27 +2,52 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Markerless WebAR (Hit Test)</title>
+    <title>Markerless WebAR (Hit Test) - 修正版</title>
     <meta name="description" content="Markerless WebAR with Hit Test">
 
-    <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <!-- AR.js (WebXR対応版) -->
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.3/aframe/build/aframe-ar-nft.js"></script>
 
     <script>
-      // ✅ Hit-test（タップでモデルを配置）用スクリプト
-      AFRAME.registerComponent('tap-place', {
+      // 修正後の Hit-test（タップでモデルを配置）用スクリプト
+      // AR.jsのar-hit-test-viewerが提供するイベントを利用します。
+      AFRAME.registerComponent('tap-place-ar', {
         init: function () {
           const sceneEl = this.el;
           const model = document.querySelector('#model');
-          sceneEl.addEventListener('click', (e) => {
-            const touch = e.detail.intersection;
-            if (touch) {
-              model.setAttribute('position', touch.point);
+          
+          // ar-hit-test-viewerがターゲットエンティティに発火するイベントを待ち受けます
+          // WebXRのARセッションでのタップ時に発火する'ar-hit-test-result'イベントを使用します。
+          sceneEl.addEventListener('ar-hit-test-result', (e) => {
+            // AR.jsのWebXRバージョンの場合、e.detail.poseに変換行列が含まれることがあります。
+            // 簡略化のため、ar-hit-test-viewerコンポーネントのロジックに任せます。
+
+            // モデルの配置は、ar-hit-test-viewerの'select'イベント（画面タップ時）と
+            // その結果として得られた位置情報で行うのが一般的です。
+
+            // ここでは、ar-hit-test-viewerコンポーネントが処理しやすいように、
+            // クリックやタップ時にモデルの位置を更新するロジックに変更します。
+
+            // ar-hit-test-viewerが検出した平面上の位置情報が利用可能であれば、
+            // それをモデルの座標としてセットします。
+            const hit = e.detail.intersection;
+
+            if (hit) {
+              const { x, y, z } = hit.point;
+              // ar-hit-test-viewerがヒットした位置をモデルに設定
+              model.setAttribute('position', `${x} ${y} ${z}`);
               model.setAttribute('visible', true);
             }
           });
+          
+          // ar-hit-test-viewerコンポーネントが内部でタップイベントを処理するため、
+          // こちらのカスタムコンポーネントでは、主にar-hit-test-viewerの動作をトリガーすることを考えます。
+          // ただし、AR.js@3.4.3のWebXR実装では、ar-hit-test-viewerがモデルの移動も兼ねていることが多いです。
+          // シンプルにar-hit-test-viewerの機能を使うため、カスタムコンポーネントは最小限にします。
+
+          // ※もし上のe.detail.intersectionでうまくいかない場合は、
+          // a-sceneにar-hit-test-viewerコンポーネントを追加し、
+          // ar-hit-test-viewerの機能でモデルを配置する方法が推奨されます。
         },
       });
     </script>
@@ -32,27 +57,27 @@
     <a-scene
       vr-mode-ui="enabled: false"
       embedded
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false; hit-testing: true;" 
       renderer="logarithmicDepthBuffer: true;"
       device-orientation-permission-ui="enabled: true"
-      tap-place>
+      
+      ar-hit-test-viewer="target: #model"
+    >
 
-      <!-- 照明 -->
       <a-entity light="type: directional; color: #ffffff; intensity: 1" position="1 1 1"></a-entity>
       <a-entity light="type: ambient; intensity: 0.5"></a-entity>
 
-      <!-- モデル読み込み -->
       <a-assets timeout="30000">
         <a-asset-item id="chisou_glb" src="./assets/tinker2.glb"></a-asset-item>
       </a-assets>
 
-      <!-- ✅ モデル（最初は非表示） -->
       <a-entity
         id="model"
         gltf-model="#chisou_glb"
         scale="12.5 12.5 12.5"
         rotation="0 0 0"
-        visible="false">
+        visible="false"
+        position="0 0 0">
       </a-entity>
 
       <a-entity camera></a-entity>
