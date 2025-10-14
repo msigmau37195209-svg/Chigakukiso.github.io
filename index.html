@@ -2,86 +2,72 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>マーカーレスAR地層モデル（.glb 実物大）</title>
-    <meta name="description" content="A-Frame + WebXR hit-test 実物大モデル">
+    <title>AR地層モデル（マーカーレス実物大）</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   </head>
-
   <body style="margin: 0; overflow: hidden;">
     <a-scene
-      vr-mode-ui="enabled: false"
-      embedded
+      renderer="colorManagement: true; physicallyCorrectLights: true;"
       xr-mode-ui="enabled: true"
       webxr="optionalFeatures: hit-test;"
-      renderer="colorManagement: true; physicallyCorrectLights: true;">
-      
-      <!-- ✅ 3Dモデルを事前読み込み -->
+      embedded
+      vr-mode-ui="enabled: false">
+
+      <!-- モデル -->
       <a-assets>
-        <a-asset-item id="chisou_glb" src="./assets/tinker.glb"></a-asset-item>
+        <a-asset-item id="model-glb" src="./assets/tinker.glb"></a-asset-item>
       </a-assets>
 
-      <!-- ✅ ヒットテストで床に設置されるエンティティ -->
-      <a-entity
-        id="reticle"
-        geometry="primitive: ring; radiusInner: 0.04; radiusOuter: 0.05;"
-        material="color: yellow; shader: flat;"
-        rotation="-90 0 0"
-        visible="false">
+      <!-- モデル表示位置を示すリング -->
+      <a-entity id="reticle"
+                visible="false"
+                geometry="primitive: ring; radiusInner: 0.04; radiusOuter: 0.05;"
+                material="color: yellow; shader: flat;"
+                rotation="-90 0 0">
       </a-entity>
 
-      <!-- ✅ 実物大モデル -->
-      <a-entity
-        id="model"
-        gltf-model="#chisou_glb"
-        position="0 0 0"
-        rotation="0 0 0"
-        scale="10 10 10"
-        visible="false">
+      <a-entity id="model"
+                gltf-model="#model-glb"
+                visible="false"
+                scale="10 10 10">
       </a-entity>
 
       <a-camera></a-camera>
     </a-scene>
 
-    <!-- ✅ 簡易ヒットテストスクリプト -->
     <script>
-      let modelPlaced = false;
-      AFRAME.registerComponent('ar-hit-test', {
-        init: function () {
-          const sceneEl = this.el;
-          const model = document.querySelector('#model');
-          const reticle = document.querySelector('#reticle');
+      const scene = document.querySelector('a-scene');
+      const model = document.querySelector('#model');
+      const reticle = document.querySelector('#reticle');
+      let hitTestSource = null;
+      let localSpace = null;
+      let placed = false;
 
-          sceneEl.addEventListener('enter-vr', () => {
-            const xrSession = sceneEl.renderer.xr.getSession();
-            xrSession.requestReferenceSpace('viewer').then((refSpace) => {
-              xrSession.requestHitTestSource({ space: refSpace }).then((hitTestSource) => {
-                const viewerSpace = refSpace;
-                sceneEl.renderer.xr.setAnimationLoop((time, frame) => {
-                  if (!frame) return;
-                  const referenceSpace = sceneEl.renderer.xr.getReferenceSpace();
-                  const hitTestResults = frame.getHitTestResults(hitTestSource);
+      scene.addEventListener('enter-vr', async () => {
+        const session = scene.renderer.xr.getSession();
+        const viewerSpace = await session.requestReferenceSpace('viewer');
+        hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+        localSpace = await session.requestReferenceSpace('local');
 
-                  if (hitTestResults.length > 0 && !modelPlaced) {
-                    const pose = hitTestResults[0].getPose(referenceSpace);
-                    reticle.visible = true;
-                    reticle.object3D.position.set(pose.transform.position.x, pose.transform.position.y, pose.transform.position.z);
+        scene.renderer.xr.setAnimationLoop((_, frame) => {
+          if (!frame) return;
+          const results = frame.getHitTestResults(hitTestSource);
+          if (results.length > 0 && !placed) {
+            const pose = results[0].getPose(localSpace);
+            reticle.visible = true;
+            reticle.object3D.position.set(pose.transform.position.x, pose.transform.position.y, pose.transform.position.z);
+          }
+        });
+      });
 
-                    window.addEventListener('click', () => {
-                      if (!modelPlaced) {
-                        model.object3D.position.copy(reticle.object3D.position);
-                        model.visible = true;
-                        modelPlaced = true;
-                        reticle.visible = false;
-                      }
-                    });
-                  }
-                });
-              });
-            });
-          });
+      window.addEventListener('click', () => {
+        if (reticle.visible && !placed) {
+          model.object3D.position.copy(reticle.object3D.position);
+          model.visible = true;
+          placed = true;
+          reticle.visible = false;
         }
       });
-      document.querySelector('a-scene').setAttribute('ar-hit-test', '');
     </script>
   </body>
 </html>
