@@ -2,40 +2,86 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title> AR地層モデル（実物大）</title>
-    <meta name="description" content="A-Frame + AR.js 実物大モデル">
-    <!-- A-Frame本体 -->
-    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-    <!-- AR.js for A-Frame -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <title>マーカーレスAR地層モデル（.glb 実物大）</title>
+    <meta name="description" content="A-Frame + WebXR hit-test 実物大モデル">
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   </head>
 
   <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs="debugUIEnabled: false;">
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      xr-mode-ui="enabled: true"
+      webxr="optionalFeatures: hit-test;"
+      renderer="colorManagement: true; physicallyCorrectLights: true;">
       
-      <!-- 🔹アセット（3Dモデルとマテリアル） -->
-      <a-assets timeout="30000">
-        <a-asset-item id="chisou_obj" src="./assets/tinker.obj"></a-asset-item>
-        <a-asset-item id="chisou_mtl" src="./assets/obj.mtl"></a-asset-item>
+      <!-- ✅ 3Dモデルを事前読み込み -->
+      <a-assets>
+        <a-asset-item id="chisou_glb" src="./assets/tinker.glb"></a-asset-item>
       </a-assets>
 
-      <!-- 🔹マーカーの設定 -->
-      <a-marker preset="hiro">
+      <!-- ✅ ヒットテストで床に設置されるエンティティ -->
+      <a-entity
+        id="reticle"
+        geometry="primitive: ring; radiusInner: 0.04; radiusOuter: 0.05;"
+        material="color: yellow; shader: flat;"
+        rotation="-90 0 0"
+        visible="false">
+      </a-entity>
 
-        <!-- 🔹3Dモデルの配置 -->
-        <a-obj-model
-          src="#chisou_obj"
-          mtl="#chisou_mtl"
-          rotation="270 0 0"      
-          position="0 1 -0.5"     
-          scale="0.75 0.75 0.75">       
-        </a-obj-model>
+      <!-- ✅ 実物大モデル -->
+      <a-entity
+        id="model"
+        gltf-model="#chisou_glb"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="10 10 10"
+        visible="false">
+      </a-entity>
 
-      </a-marker>
-
-      <!-- 🔹カメラ -->
-      <a-entity camera></a-entity>
-
+      <a-camera></a-camera>
     </a-scene>
+
+    <!-- ✅ 簡易ヒットテストスクリプト -->
+    <script>
+      let modelPlaced = false;
+      AFRAME.registerComponent('ar-hit-test', {
+        init: function () {
+          const sceneEl = this.el;
+          const model = document.querySelector('#model');
+          const reticle = document.querySelector('#reticle');
+
+          sceneEl.addEventListener('enter-vr', () => {
+            const xrSession = sceneEl.renderer.xr.getSession();
+            xrSession.requestReferenceSpace('viewer').then((refSpace) => {
+              xrSession.requestHitTestSource({ space: refSpace }).then((hitTestSource) => {
+                const viewerSpace = refSpace;
+                sceneEl.renderer.xr.setAnimationLoop((time, frame) => {
+                  if (!frame) return;
+                  const referenceSpace = sceneEl.renderer.xr.getReferenceSpace();
+                  const hitTestResults = frame.getHitTestResults(hitTestSource);
+
+                  if (hitTestResults.length > 0 && !modelPlaced) {
+                    const pose = hitTestResults[0].getPose(referenceSpace);
+                    reticle.visible = true;
+                    reticle.object3D.position.set(pose.transform.position.x, pose.transform.position.y, pose.transform.position.z);
+
+                    window.addEventListener('click', () => {
+                      if (!modelPlaced) {
+                        model.object3D.position.copy(reticle.object3D.position);
+                        model.visible = true;
+                        modelPlaced = true;
+                        reticle.visible = false;
+                      }
+                    });
+                  }
+                });
+              });
+            });
+          });
+        }
+      });
+      document.querySelector('a-scene').setAttribute('ar-hit-test', '');
+    </script>
   </body>
 </html>
