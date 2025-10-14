@@ -1,28 +1,35 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Markerless AR (AR.js)</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  </head>
-  <body style="margin: 0; overflow: hidden;">
-    <a-scene
-      vr-mode-ui="enabled: false"
-      embedded
-      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
-
-      <a-assets>
-        <a-asset-item id="model" src="./assets/tinker.glb"></a-asset-item>
-      </a-assets>
-
-      <!-- モデルを固定位置に配置 -->
-      <a-entity gltf-model="#model"
-                position="0 0 -2"
-                rotation="0 180 0"
-                scale="10 10 10">
-      </a-entity>
-
-      <a-entity camera></a-entity>
-    </a-scene>
-  </body>
+<html> 
+  <head> 
+    <meta charset="utf-8"> 
+    <title>Hello, WebAR!!! • A-Frame</title> 
+    <meta name="description" content="Hello, WebAR with A-Frame and AR.js"> 
+ 
+    <!-- A-Frame --> 
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script> 
+    <!-- AR.js (for A-Frame) --> 
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script> 
+  </head> 
+ 
+  <body style="margin: 0; overflow: hidden;"> 
+    <a-scene embedded arjs="debugUIEnabled: false;"> 
+       
+      <!-- ✅ アセットは <a-scene> の直下に置く --> 
+      <a-assets timeout="30000"> 
+        <a-asset-item id="chisou_glb" src="./assets/tinker.glb"></a-asset-item>
+      </a-assets> 
+ 
+      <!-- マーカー --> 
+      <a-marker preset="hiro"> 
+        <a-gltf-model 
+          src="#chisou_glb"
+          position="0 1 -0.5" 
+          scale="10 10 10"> <!-- 例: 実物大に調整 -->
+        </a-gltf-model> 
+      </a-marker> 
+ 
+      <!-- カメラ --> 
+      <a-entity camera></a-entity> 
+    </a-scene> 
+  </body> 
 </html>
