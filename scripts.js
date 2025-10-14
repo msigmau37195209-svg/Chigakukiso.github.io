@@ -93,7 +93,7 @@ const initThree = () => {
     "./assets/tinker2.glb",
     (gltf) => {
       model = gltf.scene;
-      model.scale.set(50,50, 50); // 実寸大に近づけたい場合は調整
+      model.scale.set(1, 1, 1); // 実寸大に近づけたい場合は調整
       model.position.set(0, -1, 0);
       scene.add(model);
     },
