@@ -16,17 +16,15 @@
        
       <!-- ✅ アセットは <a-scene> の直下に置く --> 
       <a-assets timeout="30000"> 
-        <a-asset-item id="chisou_obj" src="./assets/tinker.obj"></a-asset-item>
-        <a-asset-item id="chisou_mtl" src="./assets/obj.mtl"></a-asset-item>
+        <a-asset-item id="chisou_glb" src="./assets/tinker.glb"></a-asset-item>
       </a-assets> 
  
       <!-- マーカー --> 
       <a-marker preset="hiro" size="0.1"> 
         <a-obj-model 
-          src="#chisou_obj"
-          src="#chisou_mtl"
+          src="#chisou_glb"
           position="0 0 0" 
-          rotation="0 180 180"
+          rotation="0 0 0"
           scale="10 10 10"> <!-- 例: 実物大に調整 -->
         </a-obj-model> 
       </a-marker> 
