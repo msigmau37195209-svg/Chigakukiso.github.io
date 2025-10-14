@@ -1,36 +1,82 @@
 <!DOCTYPE html>
-<html> 
-  <head> 
-    <meta charset="utf-8"> 
-    <title>Hello, WebAR!!! • A-Frame</title> 
-    <meta name="description" content="Hello, WebAR with A-Frame and AR.js"> 
- 
-    <!-- A-Frame --> 
-    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script> 
-    <!-- AR.js (for A-Frame) --> 
-    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.3/aframe/build/aframe-ar.js"></script> 
-  </head> 
- 
-  <body style="margin: 0; overflow: hidden;"> 
-    <a-scene embedded arjs="debugUIEnabled: false;"> 
-       
-      <!-- ✅ アセットは <a-scene> の直下に置く --> 
-      <a-assets timeout="30000"> 
-        <a-asset-item id="chisou_glb" src="./assets/tinker2.glb"></a-asset-item>
-      </a-assets> 
- 
-      <!-- マーカー --> 
-      <a-marker preset="hiro" size="0.1"> 
-        <a-gltf-model 
-          src="#chisou_glb"
-          position="0 0 0" 
-          rotation="0 0 0"
-          scale="30 30 30"> <!-- 例: 実物大に調整 -->
-        </a-gltf-model> 
-      </a-marker> 
- 
-      <!-- カメラ --> 
-      <a-entity camera></a-entity> 
-    </a-scene> 
-  </body> 
+<html lang="ja">
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <title>地層AR（マーカーレス）</title>
+    <script type="module" src="./script.js"></script>
+    <style>
+      body {
+        overflow: hidden;
+        margin: 0;
+        font-family: sans-serif;
+        background: #000;
+      }
+      .device-orien-modal {
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.7);
+      }
+      .device-orien-modal-inner {
+        width: 90%;
+        max-width: 350px;
+        box-sizing: border-box;
+        height: auto;
+        padding: 1.3rem;
+        margin: auto;
+        background: white;
+        display: flex;
+        flex-direction: column;
+      }
+      .device-orien-modal-button {
+        margin: 1rem auto auto;
+        padding: 0.8rem 1.3rem;
+        background: black;
+        color: white;
+        width: 130px;
+      }
+      .is-hidden {
+        display: none;
+      }
+      #canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+      #camera {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="device-orien-modal" class="device-orien-modal is-hidden">
+      <div class="device-orien-modal-inner">
+        <p>
+          このページでは端末の向きと方向を使用します。<br />
+          表示されるポップアップで「許可」を選んでください。
+        </p>
+        <button id="device-orien-modal-button" class="device-orien-modal-button">
+          OK
+        </button>
+      </div>
+    </div>
+
+    <video id="camera" playsinline muted autoplay></video>
+    <canvas id="canvas"></canvas>
+  </body>
 </html>
